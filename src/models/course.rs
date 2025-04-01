@@ -86,6 +86,26 @@ impl Course {
         ).execute(pool).await?;
         Ok(())
     }
+
+    pub async fn insert(
+        &self,
+        pool: &sqlx::PgPool
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query_as!(
+            self,
+            r#"
+            INSERT INTO courses (id, department_id, course_number, title, description, credits)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            "#,
+            self.id,
+            self.department_id,
+            self.course_number,
+            self.title,
+            self.description,
+            self.credits
+        ).execute(pool).await?;
+        Ok(())
+    }
 }
 
 

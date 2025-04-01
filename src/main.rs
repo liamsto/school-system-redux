@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 
-use models::{course::create_course, user};
+use models::{course::create_course, department::create_department, user};
 use security::password::hash_password;
 use services::{course_service::get_course_by_id, user_service::{delete_user, insert_user}};
 use sqlx::postgres::PgPoolOptions;
@@ -50,8 +50,11 @@ async fn main() -> Result<(), sqlx::Error> {
     delete_user(&test_user, &pool).await?;
     println!("User deleted!");
 
-
-    let cosc101 = create_course(Uuid::new_v4(), 1, "COSC101".to_string(), "Intro to Computer Science".to_string(), Some("A basic intro to Java".to_string()), 3);
+    let compsci = create_department(1, "COSC".to_string(), "Computer Science".to_string());
+    compsci.insert(&pool).await?;
+    let cosc101 = create_course(Uuid::new_v4(), compsci.id, "COSC101".to_string(), "Intro to Computer Science".to_string(), Some("A basic intro to Java".to_string()), 3);
+    cosc101.insert(&pool).await?;
+    
     println!("{}", cosc101);
     let course_search = get_course_by_id(cosc101.id, &pool).await?.unwrap();
     println!("{}", course_search);
