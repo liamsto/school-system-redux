@@ -1,0 +1,22 @@
+[package]
+name = "school_system"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+argon2 = "0.5.3"
+cargo = "0.86.0"
+dotenvy = "0.15.7"
+install = "0.0.0"
+sqlx = { version = "0.8.3", features = [ "runtime-tokio", "tls-rustls-aws-lc-rs", "postgres", "uuid" ] }
+tokio = { version = "1.44.1", features = ["full"] }
+
+[dependencies.uuid]
+version = "1.16.0"
+features = [
+    "v4",
+]
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
