@@ -2,7 +2,7 @@ use std::io::{self, Write};
 
 use models::{course::create_course, department::create_department, user};
 use security::password::hash_password;
-use services::{course_service::get_course_by_id, department_service::get_department_by_code};
+use services::course_service::get_course_by_id;
 use sqlx::postgres::PgPoolOptions;
 use uuid::Uuid;
 
