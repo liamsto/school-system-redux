@@ -9,7 +9,7 @@ cargo = "0.86.0"
 dotenvy = "0.15.7"
 install = "0.0.0"
 sqlx = { version = "0.8.3", features = [ "runtime-tokio", "tls-rustls-aws-lc-rs", "postgres", "uuid" ] }
-tokio = { version = "1.44.1", features = ["full"] }
+tokio = { version = "1.44.1", features = ["rt", "macros", "rt-multi-thread"] }
 
 [dependencies.uuid]
 version = "1.16.0"
