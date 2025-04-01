@@ -9,12 +9,15 @@ pub struct Department {
 
 impl Department {
     pub async fn delete(&self, pool: &PgPool) -> Result<(), sqlx::Error> {
-        sqlx::query_as!(self,
-        r#"
+        sqlx::query_as!(
+            self,
+            r#"
         DELETE FROM departments WHERE id = $1
         "#,
-        self.id
-        ).execute(pool).await?;
+            self.id
+        )
+        .execute(pool)
+        .await?;
 
         Ok(())
     }
@@ -29,7 +32,9 @@ impl Department {
             self.id,
             self.code,
             self.name
-        ).execute(pool).await?;
+        )
+        .execute(pool)
+        .await?;
 
         Ok(())
     }

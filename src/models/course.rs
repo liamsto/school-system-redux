@@ -50,47 +50,58 @@ impl Course {
         Ok(prerequisites)
     }
 
-    pub async fn add_prerequisites(
+    pub async fn add_prerequisite(
         &self,
         pool: &sqlx::PgPool,
-        prerequisites: Vec<CoursePrerequisite>,
+        prerequisite: CoursePrerequisite,
     ) -> Result<(), sqlx::Error> {
-        let mut tx = pool.begin().await?;
-
-        for prereq in prerequisites {
-            sqlx::query!(
-                r#"
+        sqlx::query!(
+            r#"
                 INSERT INTO course_prerequisites (course_id, prerequisite_id)
                 VALUES ($1, $2)
                 ON CONFLICT DO NOTHING
                 "#,
-                prereq.course_id,
-                prereq.prerequisite_id
-            )
-            .execute(&mut *tx)
-            .await?;
-        }
+            prerequisite.course_id,
+            prerequisite.prerequisite_id
+        )
+        .execute(pool)
+        .await?;
         Ok(())
     }
 
-    pub async fn delete(
-        &self,
-        pool: &sqlx::PgPool
+    pub async fn remove_prerequisite(
+        self,
+        pool: &sqlx::PgPool,
+        prerequisite: CoursePrerequisite,
     ) -> Result<(), sqlx::Error> {
+        sqlx::query_as!(
+            CoursePrerequisite,
+            r#"
+                DELETE FROM course_prerequisites WHERE course_id=$1 AND prerequisite_id=$2
+            "#,
+            prerequisite.course_id,
+            prerequisite.prerequisite_id
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete(&self, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
         sqlx::query_as!(
             self,
             r#"
             DELETE FROM courses WHERE id = $1
             "#,
             self.id
-        ).execute(pool).await?;
+        )
+        .execute(pool)
+        .await?;
         Ok(())
     }
 
-    pub async fn insert(
-        &self,
-        pool: &sqlx::PgPool
-    ) -> Result<(), sqlx::Error> {
+    pub async fn insert(&self, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
         sqlx::query_as!(
             self,
             r#"
@@ -103,15 +114,25 @@ impl Course {
             self.title,
             self.description,
             self.credits
-        ).execute(pool).await?;
+        )
+        .execute(pool)
+        .await?;
         Ok(())
     }
 }
 
-
 impl Display for Course {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}\nUUID:{}\nDepartment: {}\nTitle: {}\nDescription: {:#?}\nCredits: {}", self.course_number, self.id, self.department_id, self.title, self.description, self.credits)?;
+        writeln!(
+            f,
+            "{}\nUUID:{}\nDepartment: {}\nTitle: {}\nDescription: {:#?}\nCredits: {}",
+            self.course_number,
+            self.id,
+            self.department_id,
+            self.title,
+            self.description,
+            self.credits
+        )?;
 
         Ok(())
     }

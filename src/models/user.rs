@@ -11,6 +11,36 @@ pub struct User {
     pub role: String,
 }
 
+impl User {
+    pub async fn insert(&self, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
+        sqlx::query_as!(
+            self,
+            r#"
+            INSERT INTO users (id, email, hashed_password, first_name, last_name, role)
+            VALUES($1, $2, $3, $4, $5, $6)
+            "#,
+            self.id,
+            self.email,
+            self.hashed_password,
+            self.first_name,
+            self.last_name,
+            self.role
+        ).execute(pool).await?;
+        Ok(())
+    }
+
+    pub async fn delete(&self, pool: &sqlx::PgPool) -> Result<(),  sqlx::Error> {
+        sqlx::query_as!(
+            self,
+            r#"
+            DELETE FROM users WHERE id = $1
+            "#,
+            self.id
+        ).execute(pool).await?;
+        Ok(())
+    }
+}
+
 pub fn create_user(
     id: Uuid,
     email: String,
