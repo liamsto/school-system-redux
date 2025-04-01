@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 
-use models::user::create_user;
+use models::user;
 use security::password::hash_password;
 use services::user_service::{delete_user, insert_user};
 use sqlx::postgres::PgPoolOptions;
@@ -22,12 +22,11 @@ async fn main() -> Result<(), sqlx::Error> {
         .await?;
 
     println!("Welcome to the user creation program.");
-    
 
     let (first_name, last_name) = loop {
         let full_name = read_input("Enter your first and last name:");
         match parse_name(&full_name) {
-            Some((first, last)) => break(first, last),
+            Some((first, last)) => break (first, last),
             None => println!("Invalid name format. Enter a valid first and last name."),
         }
     };
@@ -38,11 +37,14 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let role = "student".to_string();
 
-    
-
-
-
-    let test_user = create_user(Uuid::new_v4(), email, hashed_password, first_name, last_name, role);
+    let test_user = user::create_user(
+        Uuid::new_v4(),
+        email,
+        hashed_password,
+        first_name,
+        last_name,
+        role,
+    );
     insert_user(&test_user, &pool).await?;
     println!("User created");
     delete_user(&test_user, &pool).await?;
@@ -50,7 +52,6 @@ async fn main() -> Result<(), sqlx::Error> {
 
     Ok(())
 }
-
 
 fn read_input(prompt: &str) -> String {
     print!("{}", prompt);

@@ -1,6 +1,6 @@
 use argon2::{
-    password_hash::{PasswordHasher, SaltString, rand_core::OsRng},
     Argon2,
+    password_hash::{PasswordHasher, SaltString, rand_core::OsRng},
 };
 
 pub fn hash_password(plaintext: &str) -> Result<String, argon2::password_hash::Error> {

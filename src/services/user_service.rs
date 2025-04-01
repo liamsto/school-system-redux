@@ -26,7 +26,9 @@ pub async fn delete_user(user: &User, pool: &PgPool) -> Result<(), sqlx::Error> 
         DELETE FROM users WHERE id=$1        
         "#,
         user.id
-    ).execute(pool).await?;
+    )
+    .execute(pool)
+    .await?;
 
     Ok(())
 }
