@@ -8,7 +8,7 @@ argon2 = "0.5.3"
 cargo = "0.86.0"
 dotenvy = "0.15.7"
 install = "0.0.0"
-sqlx = { version = "0.8.3", features = [ "runtime-tokio", "tls-rustls-aws-lc-rs", "postgres", "uuid" ] }
+sqlx = { version = "0.8.3", features = [ "runtime-tokio", "tls-rustls-aws-lc-rs", "postgres", "uuid", "migrate" ] }
 tokio = { version = "1.44.1", features = ["full"] }
 
 [dependencies.uuid]

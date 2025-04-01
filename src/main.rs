@@ -9,6 +9,7 @@ use uuid::Uuid;
 mod models;
 mod security;
 mod services;
+mod tests;
 
 const DATABASE_URL: &str = "postgres://postgres:example@localhost/schooldb";
 
@@ -50,13 +51,11 @@ async fn main() -> Result<(), sqlx::Error> {
     test_user.delete(&pool).await?;
     println!("User deleted!");
 
-    let compsci = create_department("COSC".to_string(), "Computer Science".to_string());
-    compsci.insert(&pool).await?;
+    let compsci = create_department("COSC".to_string(), "Computer Science".to_string(), &pool).await?;
 
-    let compsci_db = get_department_by_code("COSC", &pool).await?.unwrap();
     let cosc101 = create_course(
         Uuid::new_v4(),
-        compsci_db.id,
+        compsci.id.expect("A department with no ID is present in database!"),
         "COSC101".to_string(),
         "Intro to Computer Science".to_string(),
         Some("A basic intro to Java".to_string()),
@@ -69,7 +68,7 @@ async fn main() -> Result<(), sqlx::Error> {
     let course_search = get_course_by_id(cosc101.id, &pool).await?.unwrap();
     println!("{}", course_search);
     cosc101.delete(&pool).await?;
-    compsci_db.delete(&pool).await?;
+    compsci.delete(&pool).await?;
     Ok(())
 }
 

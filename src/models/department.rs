@@ -2,7 +2,7 @@ use sqlx::{PgPool, prelude::FromRow};
 
 #[derive(Debug, FromRow)]
 pub struct Department {
-    pub id: i32,
+    pub id: Option<i32>,
     pub code: String,
     pub name: String,
 }
@@ -21,16 +21,8 @@ impl Department {
 
         Ok(())
     }
-}
 
-#[derive(Debug)]
-pub struct NewDepartment {
-    pub code: String,
-    pub name: String,
-}
-
-impl NewDepartment {
-    pub async fn insert(self, pool: &PgPool) -> Result<Department, sqlx::Error> {
+    async fn insert(self, pool: &PgPool) -> Result<Department, sqlx::Error> {
         let department = sqlx::query_as!(
             Department,
             r#"
@@ -46,9 +38,16 @@ impl NewDepartment {
     
         Ok(department)
     }
+
+}
+
+/// Creates a new instance of `Department`. Note that the ID will be initalized to `None`, so this function is private to prevent misuse of the struct.
+fn new(code:  String, name: String) -> Department {
+    Department { id: None, code, name }
 }
 
 
-pub fn create_department(code: String, name: String) -> NewDepartment {
-    NewDepartment { code, name }
+pub async fn create_department(code: String, name: String, pool: &PgPool) -> Result<Department, sqlx::Error> {
+    let department = new(code, name);
+    Ok(department.insert(pool).await?)
 }
