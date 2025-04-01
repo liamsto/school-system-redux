@@ -53,7 +53,7 @@ impl Course {
     pub async fn add_prerequisite(
         &self,
         pool: &sqlx::PgPool,
-        prerequisite: CoursePrerequisite,
+        prerequisite: &CoursePrerequisite,
     ) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
@@ -70,9 +70,9 @@ impl Course {
     }
 
     pub async fn remove_prerequisite(
-        self,
+        &self,
         pool: &sqlx::PgPool,
-        prerequisite: CoursePrerequisite,
+        prerequisite: &CoursePrerequisite,
     ) -> Result<(), sqlx::Error> {
         sqlx::query_as!(
             CoursePrerequisite,
