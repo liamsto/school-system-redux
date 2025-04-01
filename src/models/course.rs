@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -68,6 +70,28 @@ impl Course {
             .execute(&mut *tx)
             .await?;
         }
+        Ok(())
+    }
+
+    pub async fn delete(
+        &self,
+        pool: &sqlx::PgPool
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query_as!(
+            self,
+            r#"
+            DELETE FROM courses WHERE id = $1
+            "#,
+            self.id
+        ).execute(pool).await?;
+        Ok(())
+    }
+}
+
+
+impl Display for Course {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{}\nUUID:{}\nDepartment: {}\nTitle: {}\nDescription: {:#?}\nCredits: {}", self.course_number, self.id, self.department_id, self.title, self.description, self.credits)?;
 
         Ok(())
     }
