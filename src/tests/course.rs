@@ -4,7 +4,7 @@ use sqlx::PgPool;
 async fn test_insert_and_delete_course(pool: PgPool) -> Result<(), sqlx::Error> {
     use crate::models::course::create_course;
     use uuid::Uuid;
-
+    dotenvy::from_path("test.env").expect("Failed to load test.env");
     let course = create_course(
         Uuid::new_v4(),
         1, 
@@ -39,6 +39,7 @@ async fn test_insert_and_delete_course(pool: PgPool) -> Result<(), sqlx::Error> 
 
 #[sqlx::test(migrations = "./migrations_test")]
 async fn test_add_and_get_prerequisite(pool: PgPool) -> Result<(), sqlx::Error> {
+    dotenvy::from_path("test.env").expect("Failed to load test.env");
     use crate::models::course::create_course;
     use uuid::Uuid;
     use crate::models::course::create_prerequisite;
@@ -79,6 +80,7 @@ async fn test_remove_prerequisite(pool: PgPool) -> Result<(), sqlx::Error> {
     use crate::models::course::create_course;
     use uuid::Uuid;
     use crate::models::course::create_prerequisite;
+    dotenvy::from_path("test.env").expect("Failed to load test.env");
 
     let course = create_course(
         Uuid::new_v4(),
