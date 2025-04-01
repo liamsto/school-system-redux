@@ -25,18 +25,22 @@ impl User {
             self.first_name,
             self.last_name,
             self.role
-        ).execute(pool).await?;
+        )
+        .execute(pool)
+        .await?;
         Ok(())
     }
 
-    pub async fn delete(&self, pool: &sqlx::PgPool) -> Result<(),  sqlx::Error> {
+    pub async fn delete(&self, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
         sqlx::query_as!(
             self,
             r#"
             DELETE FROM users WHERE id = $1
             "#,
             self.id
-        ).execute(pool).await?;
+        )
+        .execute(pool)
+        .await?;
         Ok(())
     }
 }

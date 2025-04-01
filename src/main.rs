@@ -2,10 +2,7 @@ use std::io::{self, Write};
 
 use models::{course::create_course, department::create_department, user};
 use security::password::hash_password;
-use services::{
-    course_service::get_course_by_id,
-    user_service::{delete_user, insert_user},
-};
+use services::{course_service::get_course_by_id, department_service::get_department_by_code};
 use sqlx::postgres::PgPoolOptions;
 use uuid::Uuid;
 
@@ -48,16 +45,18 @@ async fn main() -> Result<(), sqlx::Error> {
         last_name,
         role,
     );
-    insert_user(&test_user, &pool).await?;
+    test_user.insert(&pool).await?;
     println!("User created");
-    delete_user(&test_user, &pool).await?;
+    test_user.delete(&pool).await?;
     println!("User deleted!");
 
-    let compsci = create_department(1, "COSC".to_string(), "Computer Science".to_string());
+    let compsci = create_department("COSC".to_string(), "Computer Science".to_string());
     compsci.insert(&pool).await?;
+
+    let compsci_db = get_department_by_code("COSC", &pool).await?.unwrap();
     let cosc101 = create_course(
         Uuid::new_v4(),
-        compsci.id,
+        compsci_db.id,
         "COSC101".to_string(),
         "Intro to Computer Science".to_string(),
         Some("A basic intro to Java".to_string()),
@@ -65,11 +64,12 @@ async fn main() -> Result<(), sqlx::Error> {
     );
     cosc101.insert(&pool).await?;
 
-    println!("{}", cosc101);
+    
+
     let course_search = get_course_by_id(cosc101.id, &pool).await?.unwrap();
     println!("{}", course_search);
     cosc101.delete(&pool).await?;
-
+    compsci_db.delete(&pool).await?;
     Ok(())
 }
 

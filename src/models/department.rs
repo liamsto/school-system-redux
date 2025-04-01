@@ -21,25 +21,34 @@ impl Department {
 
         Ok(())
     }
+}
 
-    pub async fn insert(&self, pool: &PgPool) -> Result<(), sqlx::Error> {
-        sqlx::query_as!(
-            self,
+#[derive(Debug)]
+pub struct NewDepartment {
+    pub code: String,
+    pub name: String,
+}
+
+impl NewDepartment {
+    pub async fn insert(self, pool: &PgPool) -> Result<Department, sqlx::Error> {
+        let department = sqlx::query_as!(
+            Department,
             r#"
-            INSERT INTO departments (id, code, name)
-            VALUES ($1, $2, $3)
+            INSERT INTO departments (code, name)
+            VALUES ($1, $2)
+            RETURNING id, code, name
             "#,
-            self.id,
             self.code,
             self.name
         )
-        .execute(pool)
+        .fetch_one(pool)
         .await?;
-
-        Ok(())
+    
+        Ok(department)
     }
 }
 
-pub fn create_department(id: i32, code: String, name: String) -> Department {
-    Department { id, code, name }
+
+pub fn create_department(code: String, name: String) -> NewDepartment {
+    NewDepartment { code, name }
 }

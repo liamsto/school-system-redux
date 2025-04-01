@@ -125,16 +125,17 @@ impl Display for Course {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(
             f,
-            "{}\nUUID:{}\nDepartment: {}\nTitle: {}\nDescription: {:#?}\nCredits: {}",
-            self.course_number,
-            self.id,
-            self.department_id,
-            self.title,
-            self.description,
-            self.credits
+            "{}\nUUID:{}\nDepartment: {}\nTitle: {}",
+            self.course_number, self.id, self.department_id, self.title
         )?;
 
-        Ok(())
+        if let Some(desc) = &self.description {
+            writeln!(f, "Description: {}", desc)?;
+        } else {
+            writeln!(f, "Description: None")?;
+        }
+
+        writeln!(f, "Credits: {}", self.credits)
     }
 }
 
