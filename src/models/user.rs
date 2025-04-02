@@ -35,7 +35,7 @@ impl User {
         sqlx::query_as!(
             self,
             r#"
-            DELETE FROM users WHERE id = $1
+            DELETE FROM users WHERE id=$1
             "#,
             self.id
         )
