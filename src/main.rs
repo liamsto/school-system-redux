@@ -39,14 +39,13 @@ async fn main() -> Result<(), sqlx::Error> {
     let role = "student".to_string();
 
     let test_user = user::create_user(
-        Uuid::new_v4(),
         email,
         hashed_password,
         first_name,
         last_name,
         role,
-    );
-    test_user.insert(&pool).await?;
+        &pool
+    ).await?;
     println!("User created");
     test_user.delete(&pool).await?;
     println!("User deleted!");

@@ -12,7 +12,7 @@ pub struct User {
 }
 
 impl User {
-    pub async fn insert(&self, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
+    async fn insert(&self, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
         sqlx::query_as!(
             self,
             r#"
@@ -45,7 +45,7 @@ impl User {
     }
 }
 
-pub fn create_user(
+fn new(
     id: Uuid,
     email: String,
     hashed_password: String,
@@ -61,4 +61,17 @@ pub fn create_user(
         last_name,
         role,
     }
+}
+
+pub async fn create_user(
+    email: String,
+    hashed_password: String,
+    first_name: String,
+    last_name: String,
+    role: String,
+    pool: &sqlx::PgPool
+) -> Result<User, sqlx::Error> {
+    let user = new(Uuid::new_v4(), email, hashed_password, first_name, last_name, role);
+    user.insert(pool).await?;
+    Ok(user)
 }
