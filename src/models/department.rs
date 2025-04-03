@@ -35,19 +35,25 @@ impl Department {
         )
         .fetch_one(pool)
         .await?;
-    
+
         Ok(department)
     }
-
 }
 
 /// Creates a new instance of `Department`. Note that the ID will be initalized to `None`, so this function is private to prevent misuse of the struct.
-fn new(code:  String, name: String) -> Department {
-    Department { id: None, code, name }
+fn new(code: String, name: String) -> Department {
+    Department {
+        id: None,
+        code,
+        name,
+    }
 }
 
-
-pub async fn create_department(code: String, name: String, pool: &PgPool) -> Result<Department, sqlx::Error> {
+pub async fn create_department(
+    code: String,
+    name: String,
+    pool: &PgPool,
+) -> Result<Department, sqlx::Error> {
     let department = new(code, name);
     Ok(department.insert(pool).await?)
 }

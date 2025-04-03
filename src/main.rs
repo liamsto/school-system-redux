@@ -1,9 +1,9 @@
 use std::io::{self, Write};
 
-use models::{course::create_course, department::create_department, user};
+use models::{course::create_course, course_offering::create_course_offering, department::create_department, term::create_term, user};
 use security::password::hash_password;
 use services::course_service::get_course_by_id;
-use sqlx::postgres::PgPoolOptions;
+use sqlx::{postgres::PgPoolOptions, types::chrono::NaiveDate};
 use uuid::Uuid;
 
 mod models;
@@ -38,23 +38,20 @@ async fn main() -> Result<(), sqlx::Error> {
 
     let role = "student".to_string();
 
-    let test_user = user::create_user(
-        email,
-        hashed_password,
-        first_name,
-        last_name,
-        role,
-        &pool
-    ).await?;
+    let test_user =
+        user::create_user(email, hashed_password, first_name, last_name, role, &pool).await?;
     println!("User created");
     test_user.delete(&pool).await?;
     println!("User deleted!");
 
-    let compsci = create_department("COSC".to_string(), "Computer Science".to_string(), &pool).await?;
+    let compsci =
+        create_department("COSC".to_string(), "Computer Science".to_string(), &pool).await?;
 
     let cosc101 = create_course(
         Uuid::new_v4(),
-        compsci.id.expect("A department with no ID is present in database!"),
+        compsci
+            .id
+            .expect("A department with no ID is present in database!"),
         "COSC101".to_string(),
         "Intro to Computer Science".to_string(),
         Some("A basic intro to Java".to_string()),
@@ -62,10 +59,14 @@ async fn main() -> Result<(), sqlx::Error> {
     );
     cosc101.insert(&pool).await?;
 
-    
-
     let course_search = get_course_by_id(cosc101.id, &pool).await?.unwrap();
     println!("{}", course_search);
+
+    println!("Creating course offering.");
+    let term = create_term("Winter 2024".to_string(), NaiveDate::from_ymd_opt(2024, 9, 6).unwrap(), NaiveDate::from_ymd_opt(2024, 12, 20).unwrap(), &pool).await?;
+
+    //create_course_offering(cosc101.id, term.id, instructor_id, capacity, location, &pool)
+
     cosc101.delete(&pool).await?;
     compsci.delete(&pool).await?;
     Ok(())

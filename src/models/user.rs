@@ -69,9 +69,16 @@ pub async fn create_user(
     first_name: String,
     last_name: String,
     role: String,
-    pool: &sqlx::PgPool
+    pool: &sqlx::PgPool,
 ) -> Result<User, sqlx::Error> {
-    let user = new(Uuid::new_v4(), email, hashed_password, first_name, last_name, role);
+    let user = new(
+        Uuid::new_v4(),
+        email,
+        hashed_password,
+        first_name,
+        last_name,
+        role,
+    );
     user.insert(pool).await?;
     Ok(user)
 }

@@ -47,11 +47,11 @@ CREATE TABLE terms (
 -- COURSE OFFERINGS (specific to a term)
 CREATE TABLE course_offerings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    course_id UUID REFERENCES courses(id) ON DELETE CASCADE,
-    term_id INT REFERENCES terms(id),
-    instructor_id UUID REFERENCES users(id),
+    course_id UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    term_id INT NOT NULL REFERENCES terms(id),
+    instructor_id UUID NOT NULL REFERENCES users(id),
     capacity INT NOT NULL CHECK (capacity > 0),
-    location TEXT,
+    location TEXT NOT NULL,
     UNIQUE (course_id, term_id, instructor_id)
 );
 
