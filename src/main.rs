@@ -1,12 +1,19 @@
 use std::io::{self, Write};
 
 use models::{
-    course::create_course, course_offering::create_course_offering, department::create_department,
-    term::create_term, user,
+    course::create_course,
+    course_meeting_time::{CourseMeetingTime, Weekday},
+    course_offering::CourseOffering,
+    department::create_department,
+    term::create_term,
+    user,
 };
 use security::password::hash_password;
 use services::course_service::get_course_by_id;
-use sqlx::{postgres::PgPoolOptions, types::chrono::NaiveDate};
+use sqlx::{
+    postgres::PgPoolOptions,
+    types::chrono::{NaiveDate, NaiveTime},
+};
 use uuid::Uuid;
 
 mod models;
@@ -85,7 +92,7 @@ async fn main() -> Result<(), sqlx::Error> {
     )
     .await?;
 
-    let cosc101_term1 = create_course_offering(
+    let cosc101_term1 = CourseOffering::create(
         cosc101.id,
         term.id.unwrap(),
         professor.id,
@@ -97,9 +104,22 @@ async fn main() -> Result<(), sqlx::Error> {
 
     println!("{}", cosc101_term1);
 
+    let cosc101_meeting = CourseMeetingTime::create(
+        cosc101_term1.id,
+        Weekday::Monday,
+        NaiveTime::from_hms_opt(13, 30, 0).unwrap(),
+        NaiveTime::from_hms_opt(15, 0, 0).unwrap(),
+        &pool,
+    )
+    .await?;
+
+
+    println!("{}", cosc101_meeting);
+
     cosc101.delete(&pool).await?;
     compsci.delete(&pool).await?;
     professor.delete(&pool).await?;
+    cosc101_meeting.delete(&pool).await?;
     Ok(())
 }
 
