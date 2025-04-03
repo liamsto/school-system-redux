@@ -1,6 +1,9 @@
 use std::io::{self, Write};
 
-use models::{course::create_course, course_offering::create_course_offering, department::create_department, term::create_term, user};
+use models::{
+    course::create_course, course_offering::create_course_offering, department::create_department,
+    term::create_term, user,
+};
 use security::password::hash_password;
 use services::course_service::get_course_by_id;
 use sqlx::{postgres::PgPoolOptions, types::chrono::NaiveDate};
@@ -44,6 +47,17 @@ async fn main() -> Result<(), sqlx::Error> {
     test_user.delete(&pool).await?;
     println!("User deleted!");
 
+    let hashed_password = hash_password("testpassword").unwrap();
+    let professor = user::create_user(
+        "joe.smith@gmail.com".to_string(),
+        hashed_password,
+        "Joe".to_string(),
+        "Smith".to_string(),
+        "admin".to_string(),
+        &pool,
+    )
+    .await?;
+
     let compsci =
         create_department("COSC".to_string(), "Computer Science".to_string(), &pool).await?;
 
@@ -63,12 +77,29 @@ async fn main() -> Result<(), sqlx::Error> {
     println!("{}", course_search);
 
     println!("Creating course offering.");
-    let term = create_term("Winter 2024".to_string(), NaiveDate::from_ymd_opt(2024, 9, 6).unwrap(), NaiveDate::from_ymd_opt(2024, 12, 20).unwrap(), &pool).await?;
+    let term = create_term(
+        "Winter 2024".to_string(),
+        NaiveDate::from_ymd_opt(2024, 9, 6).unwrap(),
+        NaiveDate::from_ymd_opt(2024, 12, 20).unwrap(),
+        &pool,
+    )
+    .await?;
 
-    //create_course_offering(cosc101.id, term.id, instructor_id, capacity, location, &pool)
+    let cosc101_term1 = create_course_offering(
+        cosc101.id,
+        term.id.unwrap(),
+        professor.id,
+        100,
+        "ART103".to_string(),
+        &pool,
+    )
+    .await?;
+
+    println!("{}", cosc101_term1);
 
     cosc101.delete(&pool).await?;
     compsci.delete(&pool).await?;
+    professor.delete(&pool).await?;
     Ok(())
 }
 
