@@ -1,9 +1,10 @@
 use std::fmt;
 
-use sqlx::{types::chrono::{DateTime, Utc}, PgPool};
+use sqlx::{
+    PgPool,
+    types::chrono::{DateTime, Utc},
+};
 use uuid::Uuid;
-
-
 
 pub struct Registration {
     pub id: Uuid,
@@ -11,12 +12,23 @@ pub struct Registration {
     pub offering_id: Option<Uuid>,
     pub registered_at: Option<DateTime<Utc>>,
     pub status: RegistrationStatus,
-    pub grade: Option<Grade>
+    pub grade: Option<Grade>,
 }
 
 impl Registration {
-    fn new(student_id: Option<Uuid>, offering_id: Option<Uuid>, status: RegistrationStatus) -> Self {
-        Registration { id: Uuid::new_v4(), student_id, offering_id, registered_at: None, status, grade: None }
+    fn new(
+        student_id: Option<Uuid>,
+        offering_id: Option<Uuid>,
+        status: RegistrationStatus,
+    ) -> Self {
+        Registration {
+            id: Uuid::new_v4(),
+            student_id,
+            offering_id,
+            registered_at: None,
+            status,
+            grade: None,
+        }
     }
 
     //pain in the ass
@@ -34,7 +46,7 @@ impl Registration {
         )
         .fetch_one(pool)
         .await?;
-        
+
         // Convert the raw row into our Registration, mapping the Option<String> grade into Option<Grade>. Because Rust doesn't want to implement From<Option<String>> for Option<Grade>
         let registration = Registration {
             id: row.id,
@@ -47,16 +59,22 @@ impl Registration {
         Ok(registration)
     }
 
-    pub async fn create(student_id: Option<Uuid>, offering_id: Option<Uuid>, status: RegistrationStatus, pool: &PgPool) -> Result<Registration, sqlx::Error> {
-        Ok(Self::new(student_id, offering_id, status).insert(pool).await?)
+    pub async fn create(
+        student_id: Option<Uuid>,
+        offering_id: Option<Uuid>,
+        status: RegistrationStatus,
+        pool: &PgPool,
+    ) -> Result<Registration, sqlx::Error> {
+        Ok(Self::new(student_id, offering_id, status)
+            .insert(pool)
+            .await?)
     }
 }
-
 
 pub enum RegistrationStatus {
     Registered,
     Dropped,
-    Waitlisted
+    Waitlisted,
 }
 
 impl From<String> for RegistrationStatus {
@@ -65,7 +83,7 @@ impl From<String> for RegistrationStatus {
             "registered" => RegistrationStatus::Registered,
             "dropped" => RegistrationStatus::Dropped,
             "waitlisted" => RegistrationStatus::Waitlisted,
-            _ => panic!("Invalid registration status in database!")
+            _ => panic!("Invalid registration status in database!"),
         }
     }
 }
@@ -75,7 +93,7 @@ impl fmt::Display for RegistrationStatus {
         let reg_string = match self {
             RegistrationStatus::Registered => "Registered",
             RegistrationStatus::Dropped => "Dropped",
-            RegistrationStatus::Waitlisted => "Waitlisted"
+            RegistrationStatus::Waitlisted => "Waitlisted",
         };
         write!(f, "{}", reg_string)
     }
@@ -86,7 +104,7 @@ pub enum Grade {
     B,
     C,
     D,
-    F
+    F,
 }
 
 impl From<String> for Grade {
@@ -97,11 +115,10 @@ impl From<String> for Grade {
             "C" => Grade::C,
             "D" => Grade::D,
             "F" => Grade::F,
-            _ => panic!("Invalid grade found in database!")
+            _ => panic!("Invalid grade found in database!"),
         }
     }
 }
-
 
 impl fmt::Display for Grade {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -110,8 +127,8 @@ impl fmt::Display for Grade {
             Grade::B => "B",
             Grade::C => "C",
             Grade::D => "D",
-            Grade::F => "F"
+            Grade::F => "F",
         };
-        write!(f,  "{}", grade_str)
+        write!(f, "{}", grade_str)
     }
 }
