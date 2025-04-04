@@ -70,9 +70,9 @@ impl Term {
     }
 }
 
-struct TermName {
-    pub semester: Semester,
-    pub year: String,
+pub struct TermName {
+    semester: Semester,
+    year: String,
 }
 
 impl fmt::Display for TermName {
