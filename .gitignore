@@ -3,3 +3,4 @@
 test.env
 src/rust-toolchain.toml
 /.sqlx
+Cargo.lock
