@@ -1,8 +1,8 @@
 use std::fmt;
 
+use chrono::Datelike;
 use sqlx::PgPool;
 use sqlx::types::chrono::NaiveDate;
-use chrono::Datelike;
 
 #[derive(sqlx::FromRow)]
 pub struct Term {
@@ -43,18 +43,19 @@ impl Term {
             end_date,
         })
     }
-    
+
     /// Creates and inserts a new Term into the database. Using only `start_date` and `end_date` as parameters ensures we only ever have valid terms inserted into the database.
     pub async fn create_term(
         start_date: NaiveDate,
         end_date: NaiveDate,
         pool: &sqlx::PgPool,
     ) -> Result<Term, sqlx::Error> {
-        let term = Term::new(Term::generate_name(start_date), start_date, end_date).map_err(|err| sqlx::Error::Protocol(err))?;
+        let term = Term::new(Term::generate_name(start_date), start_date, end_date)
+            .map_err(|err| sqlx::Error::Protocol(err))?;
         term.insert(pool).await
     }
 
-    /// Generates a TermName for the term. 
+    /// Generates a TermName for the term.
     fn generate_name(start_date: NaiveDate) -> TermName {
         let semester = if start_date.month() >= 9 {
             Semester::Winter
@@ -67,16 +68,12 @@ impl Term {
             year: extract_year(start_date),
         }
     }
-    
 }
-
-
 
 struct TermName {
     pub semester: Semester,
-    pub year: String 
+    pub year: String,
 }
-
 
 impl fmt::Display for TermName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -104,17 +101,16 @@ impl From<String> for TermName {
     }
 }
 
-
-enum Semester  {
+enum Semester {
     Summer,
-    Winter
+    Winter,
 }
 
-impl fmt::Display  for Semester {
+impl fmt::Display for Semester {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let semester_str = match self {
             Semester::Summer => "Summer",
-            Semester::Winter => "Winter"
+            Semester::Winter => "Winter",
         };
         write!(f, "{}", semester_str)
     }
@@ -129,7 +125,6 @@ impl From<String> for Semester {
         }
     }
 }
-
 
 fn extract_year(date: NaiveDate) -> String {
     date.format("%Y").to_string()

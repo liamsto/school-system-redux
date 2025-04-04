@@ -30,5 +30,3 @@ pub async fn get_meeting_times_by_id(
     .fetch_all(pool)
     .await?)
 }
-
-

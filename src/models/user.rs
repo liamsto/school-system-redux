@@ -131,8 +131,6 @@ impl User {
         .fetch_all(pool)
         .await?)
     }
-
-    
 }
 
 #[derive(Debug, PartialEq, Eq)]

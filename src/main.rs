@@ -1,7 +1,12 @@
 use std::io::{self, Write};
 
 use models::{
-    course::create_course, course_meeting_time::{CourseMeetingTime, Weekday}, course_offering::CourseOffering, department::create_department, term::Term, user::{FullName, Role, User}
+    course::create_course,
+    course_meeting_time::{CourseMeetingTime, Weekday},
+    course_offering::CourseOffering,
+    department::create_department,
+    term::Term,
+    user::{FullName, Role, User},
 };
 use security::password::hash_password;
 use services::{course_service::get_course_by_id, user_service::try_login};

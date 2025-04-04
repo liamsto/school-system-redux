@@ -136,9 +136,10 @@ impl Course {
         .fetch_one(pool)
         .await?;
 
-        Ok(record.count.expect("Should be able to count the number of registered students."))
+        Ok(record
+            .count
+            .expect("Should be able to count the number of registered students."))
     }
-
 }
 
 impl Display for Course {
