@@ -62,7 +62,7 @@ async fn test_add_and_get_prerequisite(pool: PgPool) -> Result<(), sqlx::Error> 
     let prereq = CoursePrerequisite::new(main_course.id, prereq_course.id);
     main_course.add_prerequisite(&pool, &prereq).await?;
 
-    let prerequisites = main_course.get_prerequisites(&pool).await?;
+    let prerequisites = main_course.prerequisites(&pool).await?;
     assert_eq!(prerequisites.len(), 1);
     assert_eq!(prerequisites[0].id, prereq_course.id);
 
@@ -100,12 +100,12 @@ async fn test_remove_prerequisite(pool: PgPool) -> Result<(), sqlx::Error> {
     let link = CoursePrerequisite::new(course.id, prereq.id);
     course.add_prerequisite(&pool, &link).await?;
 
-    let before_removal = course.get_prerequisites(&pool).await?;
+    let before_removal = course.prerequisites(&pool).await?;
     assert_eq!(before_removal.len(), 1);
 
     course.remove_prerequisite(&pool, &link).await?;
 
-    let after_removal = course.get_prerequisites(&pool).await?;
+    let after_removal = course.prerequisites(&pool).await?;
     assert_eq!(after_removal.len(), 0);
 
     Ok(())

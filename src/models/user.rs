@@ -6,6 +6,8 @@ use sqlx::{
 };
 use uuid::Uuid;
 
+use super::course::Course;
+
 #[derive(Debug, FromRow)]
 pub struct User {
     pub id: Uuid,
@@ -77,6 +79,60 @@ impl User {
         .await?;
         Ok(())
     }
+
+    /// Given a user, get all the courses the are registered in. Note that this means actually registered, not waitlisted or dropped.
+    pub async fn get_registered_courses(
+        &self,
+        pool: &sqlx::PgPool,
+    ) -> Result<Vec<Course>, sqlx::Error> {
+        Ok(sqlx::query_as!(
+            Course,
+            r#"
+            SELECT 
+            c.id, 
+            c.department_id, 
+            c.course_number, 
+            c.title, 
+            c.description, 
+            c.credits
+            FROM registrations r
+            JOIN course_offerings co ON r.offering_id = co.id
+            JOIN courses c ON co.course_id = c.id
+            WHERE r.student_id = $1 AND r.status = 'registered'
+            "#,
+            self.id
+        )
+        .fetch_all(pool)
+        .await?)
+    }
+
+    /// Retrieves  all the courses a user has a registration for, irrespective of whether they are `registered`, `dropped`, or `waitlisted`
+    pub async fn get_all_user_courses(
+        &self,
+        pool: &sqlx::PgPool,
+    ) -> Result<Vec<Course>, sqlx::Error> {
+        Ok(sqlx::query_as!(
+            Course,
+            r#"
+            SELECT 
+            c.id, 
+            c.department_id, 
+            c.course_number, 
+            c.title, 
+            c.description, 
+            c.credits
+            FROM registrations r
+            JOIN course_offerings co ON r.offering_id = co.id
+            JOIN courses c ON co.course_id = c.id
+            WHERE r.student_id = $1
+            "#,
+            self.id
+        )
+        .fetch_all(pool)
+        .await?)
+    }
+
+    
 }
 
 #[derive(Debug, PartialEq, Eq)]

@@ -52,19 +52,14 @@ async fn main() -> Result<(), sqlx::Error> {
 
     println!("Now try logging in!");
 
-    
     loop {
         let email = read_input("Enter your email: ");
-        let password = read_input("Enter your password: ");    
+        let password = read_input("Enter your password: ");
         let login_success = try_login(&email, &password, &pool).await?;
         if login_success {
-            break
+            break;
         }
     }
-    
-    
-
-
 
     println!("User created");
     test_user.delete(&pool).await?;

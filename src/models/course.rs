@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use sqlx::FromRow;
+use sqlx::{FromRow, PgPool};
 use uuid::Uuid;
 
 use super::course_prerequisite::CoursePrerequisite;
@@ -35,7 +35,7 @@ pub fn create_course(
 
 // Generally speaking, something should go in the impl block unless it spans multiple entites (e.g enrolling a user in a course), has nontrivial I/O, or uses transactions
 impl Course {
-    pub async fn get_prerequisites(&self, pool: &sqlx::PgPool) -> Result<Vec<Course>, sqlx::Error> {
+    pub async fn prerequisites(&self, pool: &PgPool) -> Result<Vec<Course>, sqlx::Error> {
         let prerequisites = sqlx::query_as!(
             Course,
             r#"
@@ -90,7 +90,7 @@ impl Course {
         Ok(())
     }
 
-    pub async fn delete(&self, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
+    pub async fn delete(&self, pool: &PgPool) -> Result<(), sqlx::Error> {
         sqlx::query_as!(
             self,
             r#"
@@ -103,7 +103,7 @@ impl Course {
         Ok(())
     }
 
-    pub async fn insert(&self, pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
+    pub async fn insert(&self, pool: &PgPool) -> Result<(), sqlx::Error> {
         sqlx::query_as!(
             self,
             r#"
@@ -121,6 +121,24 @@ impl Course {
         .await?;
         Ok(())
     }
+
+    /// Returns the number of students currently registered for this course.
+    pub async fn current_enrollment(&self, pool: &PgPool) -> Result<i64, sqlx::Error> {
+        let record = sqlx::query!(
+            r#"
+            SELECT COUNT(*) AS count
+            FROM registrations r
+            JOIN course_offerings co ON r.offering_id = co.id
+            WHERE co.course_id = $1 AND r.status = 'registered'
+            "#,
+            self.id
+        )
+        .fetch_one(pool)
+        .await?;
+
+        Ok(record.count.expect("Should be able to count the number of registered students."))
+    }
+
 }
 
 impl Display for Course {

@@ -4,17 +4,10 @@ use uuid::Uuid;
 use crate::{
     models::{
         student_profile::{StudentMajor, StudentProfile},
-        user::{self, FullName, Role, User},
+        user::{FullName, Role, User},
     },
     security::password::{self, validate_password},
 };
-
-pub async fn get_user_hash(user: User, pool: &sqlx::PgPool) -> Result<String, sqlx::Error> {
-    let user = sqlx::query!(r#"SELECT hashed_password FROM users WHERE id=$1"#, user.id)
-        .fetch_one(pool)
-        .await?;
-    Ok(user.hashed_password)
-}
 
 pub async fn get_user_by_id(id: Uuid, pool: &sqlx::PgPool) -> Result<Option<User>, sqlx::Error> {
     let user = sqlx::query_as!(
