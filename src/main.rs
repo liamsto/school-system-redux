@@ -113,7 +113,6 @@ async fn main() -> Result<(), sqlx::Error> {
     )
     .await?;
 
-
     println!("{}", cosc101_meeting);
 
     cosc101.delete(&pool).await?;
