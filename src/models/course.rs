@@ -3,6 +3,8 @@ use std::fmt::Display;
 use sqlx::FromRow;
 use uuid::Uuid;
 
+use super::course_prerequisite::CoursePrerequisite;
+
 #[derive(Debug, FromRow)]
 pub struct Course {
     pub id: Uuid,
@@ -57,10 +59,10 @@ impl Course {
     ) -> Result<(), sqlx::Error> {
         sqlx::query!(
             r#"
-                INSERT INTO course_prerequisites (course_id, prerequisite_id)
-                VALUES ($1, $2)
-                ON CONFLICT DO NOTHING
-                "#,
+            INSERT INTO course_prerequisites (course_id, prerequisite_id)
+            VALUES ($1, $2)
+            ON CONFLICT DO NOTHING
+            "#,
             prerequisite.course_id,
             prerequisite.prerequisite_id
         )
@@ -77,7 +79,7 @@ impl Course {
         sqlx::query_as!(
             CoursePrerequisite,
             r#"
-                DELETE FROM course_prerequisites WHERE course_id=$1 AND prerequisite_id=$2
+            DELETE FROM course_prerequisites WHERE course_id=$1 AND prerequisite_id=$2
             "#,
             prerequisite.course_id,
             prerequisite.prerequisite_id
@@ -139,15 +141,3 @@ impl Display for Course {
     }
 }
 
-#[derive(Debug, FromRow)]
-pub struct CoursePrerequisite {
-    course_id: Uuid,
-    prerequisite_id: Uuid,
-}
-
-pub fn create_prerequisite(course_id: Uuid, prerequisite_id: Uuid) -> CoursePrerequisite {
-    CoursePrerequisite {
-        course_id,
-        prerequisite_id,
-    }
-}

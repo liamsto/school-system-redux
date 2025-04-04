@@ -6,3 +6,4 @@ pub mod registration;
 pub mod student_profile;
 pub mod term;
 pub mod user;
+pub mod course_prerequisite;

@@ -35,7 +35,7 @@ async fn test_insert_and_delete_course(pool: PgPool) -> Result<(), sqlx::Error> 
 async fn test_add_and_get_prerequisite(pool: PgPool) -> Result<(), sqlx::Error> {
     dotenvy::from_path("test.env").expect("Failed to load test.env");
     use crate::models::course::create_course;
-    use crate::models::course::create_prerequisite;
+    use crate::models::course_prerequisite::CoursePrerequisite;
     use uuid::Uuid;
 
     let main_course = create_course(
@@ -59,7 +59,7 @@ async fn test_add_and_get_prerequisite(pool: PgPool) -> Result<(), sqlx::Error> 
     main_course.insert(&pool).await?;
     prereq_course.insert(&pool).await?;
 
-    let prereq = create_prerequisite(main_course.id, prereq_course.id);
+    let prereq = CoursePrerequisite::new(main_course.id, prereq_course.id);
     main_course.add_prerequisite(&pool, &prereq).await?;
 
     let prerequisites = main_course.get_prerequisites(&pool).await?;
@@ -72,7 +72,7 @@ async fn test_add_and_get_prerequisite(pool: PgPool) -> Result<(), sqlx::Error> 
 #[sqlx::test(migrations = "./migrations_test")]
 async fn test_remove_prerequisite(pool: PgPool) -> Result<(), sqlx::Error> {
     use crate::models::course::create_course;
-    use crate::models::course::create_prerequisite;
+    use crate::models::course_prerequisite::CoursePrerequisite;
     use uuid::Uuid;
     dotenvy::from_path("test.env").expect("Failed to load test.env");
 
@@ -97,7 +97,7 @@ async fn test_remove_prerequisite(pool: PgPool) -> Result<(), sqlx::Error> {
     course.insert(&pool).await?;
     prereq.insert(&pool).await?;
 
-    let link = create_prerequisite(course.id, prereq.id);
+    let link = CoursePrerequisite::new(course.id, prereq.id);
     course.add_prerequisite(&pool, &link).await?;
 
     let before_removal = course.get_prerequisites(&pool).await?;
