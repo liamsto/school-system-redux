@@ -12,6 +12,7 @@ pub fn hash_password(plaintext: &str) -> Result<String, argon2::password_hash::E
     Ok(hashed)
 }
 
+/// Hashes a provided plaintext password and compares it to a known hash. Returns `true` or `false` based on correct/incorrect passwords.
 pub fn validate_password(
     plaintext: &str,
     hash: &str,

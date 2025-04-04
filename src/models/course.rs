@@ -140,4 +140,3 @@ impl Display for Course {
         writeln!(f, "Credits: {}", self.credits)
     }
 }
-

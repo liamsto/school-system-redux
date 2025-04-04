@@ -1,9 +1,9 @@
 pub mod course;
 pub mod course_meeting_time;
 pub mod course_offering;
+pub mod course_prerequisite;
 pub mod department;
 pub mod registration;
 pub mod student_profile;
 pub mod term;
 pub mod user;
-pub mod course_prerequisite;

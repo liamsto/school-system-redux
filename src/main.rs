@@ -6,10 +6,10 @@ use models::{
     course_offering::CourseOffering,
     department::create_department,
     term::create_term,
-    user,
+    user::{FullName, Role, User},
 };
 use security::password::hash_password;
-use services::course_service::get_course_by_id;
+use services::{course_service::get_course_by_id, user_service::try_login};
 use sqlx::{
     postgres::PgPoolOptions,
     types::chrono::{NaiveDate, NaiveTime},
@@ -34,33 +34,48 @@ async fn main() -> Result<(), sqlx::Error> {
 
     println!("Welcome to the user creation program.");
 
-    let (first_name, last_name) = loop {
-        let full_name = read_input("Enter your first and last name:");
+    let name = loop {
+        let full_name = read_input("Enter your first and last name: ");
         match parse_name(&full_name) {
-            Some((first, last)) => break (first, last),
+            Some(name) => break name,
             None => println!("Invalid name format. Enter a valid first and last name."),
         }
     };
 
-    let email = read_input("Enter your email:");
-    let password = read_input("Enter a secure password:");
+    let email = read_input("Enter your email: ");
+    let password = read_input("Enter a secure password: ");
     let hashed_password = hash_password(&password).expect("Password hashing failed");
 
-    let role = "student".to_string();
+    let role = Role::Student;
 
-    let test_user =
-        user::create_user(email, hashed_password, first_name, last_name, role, &pool).await?;
+    let test_user = User::create_user(email, hashed_password, name, role, &pool).await?;
+
+    println!("Now try logging in!");
+
+    
+    loop {
+        let email = read_input("Enter your email: ");
+        let password = read_input("Enter your password: ");    
+        let login_success = try_login(&email, &password, &pool).await?;
+        if login_success {
+            break
+        }
+    }
+    
+    
+
+
+
     println!("User created");
     test_user.delete(&pool).await?;
     println!("User deleted!");
 
     let hashed_password = hash_password("testpassword").unwrap();
-    let professor = user::create_user(
+    let professor = User::create_user(
         "joe.smith@gmail.com".to_string(),
         hashed_password,
-        "Joe".to_string(),
-        "Smith".to_string(),
-        "admin".to_string(),
+        FullName::new("Joe", "Smith"),
+        Role::Admin,
         &pool,
     )
     .await?;
@@ -131,9 +146,12 @@ fn read_input(prompt: &str) -> String {
     buf.trim().to_string()
 }
 
-fn parse_name(input: &str) -> Option<(String, String)> {
+fn parse_name(input: &str) -> Option<FullName> {
     let mut parts = input.trim().splitn(2, ' ');
     let first = parts.next()?;
     let last = parts.next()?;
-    Some((first.to_string(), last.to_string()))
+    Some(FullName {
+        first: first.to_string(),
+        last: last.to_string(),
+    })
 }
