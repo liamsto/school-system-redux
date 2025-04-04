@@ -1,12 +1,7 @@
 use std::io::{self, Write};
 
 use models::{
-    course::create_course,
-    course_meeting_time::{CourseMeetingTime, Weekday},
-    course_offering::CourseOffering,
-    department::create_department,
-    term::create_term,
-    user::{FullName, Role, User},
+    course::create_course, course_meeting_time::{CourseMeetingTime, Weekday}, course_offering::CourseOffering, department::create_department, term::Term, user::{FullName, Role, User}
 };
 use security::password::hash_password;
 use services::{course_service::get_course_by_id, user_service::try_login};
@@ -94,8 +89,8 @@ async fn main() -> Result<(), sqlx::Error> {
     println!("{}", course_search);
 
     println!("Creating course offering.");
-    let term = create_term(
-        "Winter 2024".to_string(),
+
+    let term = Term::create_term(
         NaiveDate::from_ymd_opt(2024, 9, 6).unwrap(),
         NaiveDate::from_ymd_opt(2024, 12, 20).unwrap(),
         &pool,
