@@ -20,20 +20,21 @@ impl From<LoginMessage> for Message {
 pub struct App {
     login_state: LoginState,
     pool: PgPool,
+    handle: tokio::runtime::Handle,
 }
 
 impl App {
     /// Creates a new instance of our application.
-    pub fn new(pool: PgPool) -> (Self, Task<Message>) {
+    pub fn new(pool: PgPool, handle: tokio::runtime::Handle) -> (Self, Task<Message>) {
         (
             Self {
                 login_state: LoginState::default(),
                 pool,
+                handle,
             },
             Task::none(),
         )
     }
-
     /// Returns the window title.
     pub fn title(&self) -> String {
         String::from("Login - SchoolRedux")
@@ -55,17 +56,22 @@ impl App {
                     let email = self.login_state.email.clone();
                     let password = self.login_state.password.clone();
                     let pool = self.pool.clone();
+                    let handle = self.handle.clone();
 
                     // Launch the asynchronous backend login function, converting sqlx::Error into String.
                     Task::perform(
                         async move {
-                            // Create a local Tokio runtime to execute the async database operation.
-                            let rt = tokio::runtime::Runtime::new().expect("Failed to create runtime");
-                            rt.block_on(user_service::try_login(&email, &password, &pool))
+                            // Spawn the login future on the Tokio runtime.
+                            let join_handle = handle.spawn(async move {
+                                user_service::try_login(&email, &password, &pool).await
+                            });
+                            // Await the result from the tokio task.
+                            join_handle.await
+                                .expect("Tokio task panicked")
                                 .map_err(|e| e.to_string())
                         },
                         |result| LoginMessage::LoginResult(result).into(),
-                    )                    
+                    )                
                 }
                 LoginMessage::LoginResult(result) => {
                     // Update the login status with a String message.
