@@ -1,4 +1,4 @@
-use iced::{Element, widget::Column, widget::TextInput, widget::Button, widget::Text};
+use iced::{widget::{Button, Column, Text, TextInput}, Alignment, Element, Padding};
 
 /// Messages for the login view.
 #[derive(Debug, Clone)]
@@ -36,6 +36,8 @@ impl LoginState {
 
         let mut content = Column::new()
             .spacing(20)
+            .align_x(Alignment::Center)
+            .padding(Padding::from([250, 100]))
             .push(email_input)
             .push(password_input)
             .push(login_button);
