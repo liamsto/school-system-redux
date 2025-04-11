@@ -1,4 +1,7 @@
-use iced::{widget::{Button, Column, Text, TextInput}, Alignment, Element, Padding};
+use iced::{
+    Alignment, Element, Padding,
+    widget::{Button, Column, Text, TextInput},
+};
 
 /// Messages for the login view.
 #[derive(Debug, Clone)]
@@ -6,7 +9,7 @@ pub enum Message {
     EmailChanged(String),
     PasswordChanged(String),
     LoginClicked,
-    // Changed error type to String to satisfy Clone bound.
+    RegisterClicked,
     LoginResult(Result<bool, String>),
 }
 
@@ -34,13 +37,18 @@ impl LoginState {
             .on_press(Message::LoginClicked)
             .padding(10);
 
+        let register_button = Button::new(Text::new("Register"))
+            .on_press(Message::RegisterClicked)
+            .padding(10);
+
         let mut content = Column::new()
             .spacing(20)
             .align_x(Alignment::Center)
             .padding(Padding::from([250, 100]))
             .push(email_input)
             .push(password_input)
-            .push(login_button);
+            .push(login_button)
+            .push(register_button);
 
         if let Some(ref status) = self.login_status {
             content = content.push(Text::new(status));
