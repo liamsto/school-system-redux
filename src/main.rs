@@ -7,14 +7,15 @@ mod ui;
 use sqlx::PgPool;
 use ui::app::{title_fn, update_fn, view_fn, App};
 
-const DATABASE_URL: &str = "postgres://postgres:example@localhost/schooldb";
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<(), sqlx::Error> {
     dotenvy::dotenv().ok();
-
+    let database_url = std::env::var("DATABASE_URL")
+    .expect("DATABASE_URL must be set in the .env file");
+    
     // Create the database pool.
-    let pool = PgPool::connect(DATABASE_URL).await?;
+    let pool = PgPool::connect(&database_url).await?;
     let handle = tokio::runtime::Handle::current();
     // Launch the application using the builder API.
     iced::application(title_fn, update_fn, view_fn)
